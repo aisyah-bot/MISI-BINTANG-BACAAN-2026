@@ -10,7 +10,7 @@
 <script>
 "use strict";
 const $=id=>document.getElementById(id);
-const assets=Array.from({length:27},(_,i)=>"assets/"+String(i+1).padStart(2,"0")+".png");
+const assets=Array.from({length:27},(_,i)=>String(i+1).padStart(2,"0")+".png");
 const fallback=["https://raw.githubusercontent.com/aisyah-bot/MISI-BINTANG-BAHASA/main/latar-pengembaraan.png.png","https://raw.githubusercontent.com/aisyah-bot/MISI-BINTANG-BAHASA/main/assets-tahap1-masa-itu-emas.png","https://raw.githubusercontent.com/aisyah-bot/MISI-BINTANG-BAHASA/main/latar-pengembaraan.png.png","https://raw.githubusercontent.com/aisyah-bot/MISI-BINTANG-BAHASA/main/assets-tahap3-warisan.png.png"];
 const missions=[
  {title:"Masa itu emas",world:"Istana Masa Emas",meaning:"Masa sangat berharga dan perlu digunakan dengan sebaik-baiknya.",texts:["Masa itu emas","Aiman menyiapkan kerja sekolahnya dengan segera kerana dia tahu bahawa masa itu emas.","Siti menggunakan masa lapangnya untuk membaca buku kerana dia percaya bahawa masa itu emas."],audio:[null,"https://raw.githubusercontent.com/aisyah-bot/MISI-BINTANG-BAHASA/main/t1-ayat1.mp3.mp3","https://raw.githubusercontent.com/aisyah-bot/MISI-BINTANG-BAHASA/main/t1-ayat2.mp3.mp3"],questions:[
