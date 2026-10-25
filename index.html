@@ -60,6 +60,40 @@ function playRecording(){let b=recordings[mi+"-"+ri];if(!b)return reportStatus("
 function renderTeacher(){let a=block("RUANG GURU — PENTAKSIRAN",'<div class="teacher"><p>Rekod murid disimpan dalam pelayar peranti ini sahaja. Rakaman dalam sesi semasa boleh dimainkan; rekod tidak dikongsi antara peranti.</p><label for="studentPick">Pilih murid: </label><select id="studentPick"></select><p id="teacherStat"></p><label>Misi <select id="missionPick"><option value="0">1</option><option value="1">2</option><option value="2">3</option></select></label> · <label>Bacaan <select id="readPick"><option value="0">Peribahasa</option><option value="1">Ayat 1</option><option value="2">Ayat 2</option></select></label><p><label>Sebutan /10 <input type="number" id="sebutan" min="0" max="10" value="0"></label> <label>Kelancaran /5 <input type="number" id="lancar" min="0" max="5" value="0"></label> <label>Intonasi /5 <input type="number" id="intonasi" min="0" max="5" value="0"></label></p><p id="teacherMsg" class="status"></p><div class="buttons" id="teacherAct"></div><table><thead><tr><th>Nama Murid</th><th>Misi 1</th><th>Misi 2</th><th>Misi 3</th><th>Rakaman (sesi)</th></tr></thead><tbody id="rows"></tbody></table></div>');let opts=$("studentPick");Object.keys(students).forEach(n=>{let o=document.createElement("option");o.value=n;o.textContent=n;opts.append(o)});if(students[name])opts.value=name;function refresh(){let n=opts.value,e=students[n],m=+$("missionPick").value,r=+$("readPick").value;if(!e)return;$("teacherStat").textContent="Status misi: "+e.finished.map((x,i)=>(i+1)+":"+(x?"Selesai":"Belum")).join(" · ")+" | Kefahaman: "+e.quiz[m].filter(Boolean).length+"/2";let s=e.marks[m+"-"+r]||[0,0,0];["sebutan","lancar","intonasi"].forEach((k,i)=>$(k).value=s[i])};["studentPick","missionPick","readPick"].forEach(k=>$(k).onchange=refresh);Object.entries(students).forEach(([n,e])=>{let tr=document.createElement("tr");[n,...e.finished.map((f,i)=>(f?"Selesai":"Belum")+" / "+e.stars[i]+"⭐"),String(e.recordCount||0)].forEach(s=>{let td=document.createElement("td");td.textContent=s;tr.append(td)});$("rows").append(tr)});let ta=$("teacherAct");add(ta,"▶ DENGAR RAKAMAN",()=>{if(opts.value!==name)return alert("Rakaman hanya boleh dimainkan bagi murid aktif pada sesi/peranti ini.");mi=+$("missionPick").value;ri=+$("readPick").value;playRecording()});add(ta,"💾 SIMPAN PENILAIAN",()=>{let n=opts.value,e=students[n],m=+$("missionPick").value,r=+$("readPick").value;if(!e)return;let values=["sebutan","lancar","intonasi"].map(x=>Number($(x).value)),max=[10,5,5];if(values.some((v,i)=>!Number.isFinite(v)||v<0||v>max[i]))return alert("Semak julat markah.");e.marks[m+"-"+r]=values;save();$("teacherMsg").textContent="Penilaian disimpan: "+values.reduce((a,b)=>a+b,0)+"/20."},"green");add(ta,"⬇ EKSPORT CSV",exportCsv,"gold");add(a,"🏠 UTAMA",()=>openScreen("home"));refresh()}
 function exportCsv(){let rows=[["Nama Murid","Misi","Bacaan","Sebutan (10)","Kelancaran (5)","Intonasi (5)","Markah Bacaan (20)","Kefahaman Selesai (2)","Status Misi"]];for(let [n,e]of Object.entries(students))for(let m=0;m<3;m++)for(let r=0;r<3;r++){let s=e.marks[m+"-"+r]||["","",""];rows.push([n,m+1,["Peribahasa","Ayat 1","Ayat 2"][r],...s,s.every(x=>typeof x==="number")?s.reduce((a,b)=>a+b,0):"",e.quiz[m].filter(Boolean).length,e.finished[m]?"Selesai":"Belum"])}const csv="\uFEFF"+rows.map(r=>r.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(",")).join("\r\n"),url=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"})),a=document.createElement("a");a.href=url;a.download="rekod-misi-bintang-bacaan.csv";a.click();setTimeout(()=>URL.revokeObjectURL(url),2000)}
 $("teacherShortcut").onclick=()=>{let pass=prompt("Masukkan kod akses guru (lalai: 1234). Tukar kod dalam HTML sebelum kegunaan sebenar.");if(pass==="1234")openScreen("teacher");else if(pass!==null)alert("Kod tidak tepat.")};
+
+/* Coordinate mapping for 27 individually illustrated screens.
+   Percentage values are measured relative to the 16:9 image. */
+const HOTSPOT_LAYOUT={
+  0:{"Mula Pengembaraan":[30,72,43,13],"Cara Bermain":[19,87,21,12],"Pencapaian":[40,87,21,12],"Ruang Guru":[61,87,21,12]},
+  1:{"Kembali ke peta":[34,79,34,16]},
+  2:{"Misi 1":[6,31,27,53],"Misi 2":[36,31,28,53],"Misi 3":[67,31,27,53]},
+  3:{"Mula aktiviti bacaan":[30,74,44,14],"Utama":[34,88,16,11],"Peta":[51,88,16,11]},
+  4:{"Dengar contoh":[26,60,24,11],"Ulang audio":[51,60,25,11],"Mula rakaman":[26,71,24,11],"Hentikan rakaman":[51,71,25,11],"Dengar rakaman":[26,82,24,11],"Semak bacaan":[51,82,25,11],"Seterusnya":[39,92,24,8]},
+  5:{"Dengar contoh":[26,60,24,11],"Ulang audio":[51,60,25,11],"Mula rakaman":[26,71,24,11],"Hentikan rakaman":[51,71,25,11],"Dengar rakaman":[26,82,24,11],"Semak bacaan":[51,82,25,11],"Seterusnya":[39,92,24,8]},
+  6:{"Dengar contoh":[26,60,24,11],"Ulang audio":[51,60,25,11],"Mula rakaman":[26,71,24,11],"Hentikan rakaman":[51,71,25,11],"Dengar rakaman":[26,82,24,11],"Semak bacaan":[51,82,25,11],"Seterusnya":[39,92,24,8]},
+  7:{"Semak jawapan":[32,83,32,16],"Seterusnya":[65,83,32,16]},
+  8:{"Semak jawapan":[32,83,32,16],"Seterusnya":[65,83,32,16]},
+  9:{"Kembali ke peta":[31,82,39,16]},
+  10:{"Mula aktiviti bacaan":[30,74,44,14],"Utama":[34,88,16,11],"Peta":[51,88,16,11]},
+  11:{"Dengar contoh":[26,60,24,11],"Ulang audio":[51,60,25,11],"Mula rakaman":[26,71,24,11],"Hentikan rakaman":[51,71,25,11],"Dengar rakaman":[26,82,24,11],"Semak bacaan":[51,82,25,11],"Seterusnya":[39,92,24,8]},
+  12:{"Dengar contoh":[26,60,24,11],"Ulang audio":[51,60,25,11],"Mula rakaman":[26,71,24,11],"Hentikan rakaman":[51,71,25,11],"Dengar rakaman":[26,82,24,11],"Semak bacaan":[51,82,25,11],"Seterusnya":[39,92,24,8]},
+  13:{"Dengar contoh":[26,60,24,11],"Ulang audio":[51,60,25,11],"Mula rakaman":[26,71,24,11],"Hentikan rakaman":[51,71,25,11],"Dengar rakaman":[26,82,24,11],"Semak bacaan":[51,82,25,11],"Seterusnya":[39,92,24,8]},
+  14:{"Semak jawapan":[32,83,32,16],"Seterusnya":[65,83,32,16]},
+  15:{"Semak jawapan":[32,83,32,16],"Seterusnya":[65,83,32,16]},
+  16:{"Kembali ke peta":[31,82,39,16]},
+  17:{"Mula aktiviti bacaan":[30,74,44,14],"Utama":[34,88,16,11],"Peta":[51,88,16,11]},
+  18:{"Dengar contoh":[26,60,24,11],"Ulang audio":[51,60,25,11],"Mula rakaman":[26,71,24,11],"Hentikan rakaman":[51,71,25,11],"Dengar rakaman":[26,82,24,11],"Semak bacaan":[51,82,25,11],"Seterusnya":[39,92,24,8]},
+  19:{"Dengar contoh":[26,60,24,11],"Ulang audio":[51,60,25,11],"Mula rakaman":[26,71,24,11],"Hentikan rakaman":[51,71,25,11],"Dengar rakaman":[26,82,24,11],"Semak bacaan":[51,82,25,11],"Seterusnya":[39,92,24,8]},
+  20:{"Dengar contoh":[26,60,24,11],"Ulang audio":[51,60,25,11],"Mula rakaman":[26,71,24,11],"Hentikan rakaman":[51,71,25,11],"Dengar rakaman":[26,82,24,11],"Semak bacaan":[51,82,25,11],"Seterusnya":[39,92,24,8]},
+  21:{"Semak jawapan":[32,83,32,16],"Seterusnya":[65,83,32,16]},
+  22:{"Semak jawapan":[32,83,32,16],"Seterusnya":[65,83,32,16]},
+  23:{"Kembali ke peta":[31,82,39,16]},
+  24:{"Lihat sijil":[18,82,30,16],"Kembali ke peta":[51,82,30,16]},
+  25:{"Cetak sijil":[36,84,30,14]},
+  26:{"Utama":[6,86,15,11]}
+};
+const HOTSPOT_DEBUG=new URLSearchParams(location.search).has("hotspots");
+
 /* V3 interactive graphic scenes: graphic is primary UI, invisible hotspots execute actions */
 const v3stage=$("stage");
 function sceneGraphic(idx){
@@ -67,7 +101,7 @@ function sceneGraphic(idx){
   const img=document.createElement("img");img.className="sceneart";img.alt="Paparan permainan "+(idx+1);img.src=assets[idx];v3stage.append(img);
 }
 function hot(x,y,w,h,title,fn,disabled=false){
- const b=document.createElement("button");b.className="hot";b.type="button";b.setAttribute("aria-label",title);b.title=title;b.style.cssText="left:"+x+"%;top:"+y+"%;width:"+w+"%;height:"+h+"%";b.disabled=disabled;b.onclick=fn;v3stage.append(b);return b;
+ const b=document.createElement("button");b.className="hot";b.type="button";b.setAttribute("aria-label",title);b.title=title;const loc=(HOTSPOT_LAYOUT[bgIndex()]||{})[title];if(loc)[x,y,w,h]=loc;b.style.cssText="left:"+x+"%;top:"+y+"%;width:"+w+"%;height:"+h+"%";if(HOTSPOT_DEBUG){b.style.background="#ff330044";b.style.border="2px dashed yellow";b.style.color="white";b.style.fontSize="10px";b.textContent=title}b.disabled=disabled;b.onclick=fn;v3stage.append(b);return b;
 }
 function floating(x,y,w,h,htmlText,cls=""){
  const d=document.createElement("div");d.className="floatbox "+cls;d.style.cssText="left:"+x+"%;top:"+y+"%;width:"+w+"%;"+(h?"max-height:"+h+"%;overflow:auto;":"");d.innerHTML=htmlText;v3stage.append(d);return d;
@@ -120,7 +154,7 @@ function v3render(){
    if(!name)return openScreen("home");
    const e=entry();floating(31,58,39,16,"<b>"+e.finished.filter(Boolean).length+"/3 misi selesai</b><br>"+e.stars.reduce((a,b)=>a+b,0)+" daripada 9 bintang");
    hot(18,82,30,16,"Lihat sijil",()=>e.finished.every(Boolean)?openScreen("certificate"):alert("Lengkapkan semua misi."));
-   hot(50,85,30,12,"Kembali ke peta",()=>openScreen("map"));
+   hot(51,82,30,16,"Kembali ke peta",()=>openScreen("map"));
  }else if(screen==="certificate"){
    const e=entry();if(!e.finished.every(Boolean))return openScreen("map");
    floating(31,35,37,9,"Penerima: "+name);
