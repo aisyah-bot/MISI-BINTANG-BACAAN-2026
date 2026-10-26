@@ -79,7 +79,7 @@ function toggleHomeSound(){
   audio.play().catch(()=>alert("Audio tidak dapat dimainkan. Sila semak tetapan bunyi Safari."));
  }
 }
-const BACK_LABELS=["Kembali","Kembali ke peta"];const HOTSPOT_DEBUG=new URLSearchParams(location.search).has("hotspots");
+const BACK_LABELS=["Kembali","Kembali ke peta"];const HOTSPOT_DEBUG=false;
 
 /* V3 interactive graphic scenes: graphic is primary UI, invisible hotspots execute actions */
 const v3stage=$("stage");
@@ -131,23 +131,26 @@ function v3render(){
    const isChoice=!q.sort;
    const quizScene=bgIndex();
    if(isChoice){
-     /* All text is already printed on the artwork: clickable transparent card regions only. */
-     const positions=[[13,54,24,33],[38,54,24,33],[63,54,24,33]];
-     positions.forEach((p,i)=>{
-       const select=()=>{
-         chosen=i;
-         v3stage.querySelectorAll(".answer-selection").forEach(el=>el.remove());
-         const border=document.createElement("div");
-         border.className="answer-selection";
-         border.style.cssText="position:absolute;left:"+p[0]+"%;top:"+p[1]+"%;width:"+p[2]+"%;height:"+p[3]+"%;pointer-events:none;border:4px solid #28e263;border-radius:18px;background:#30e9792b;z-index:15";
-         v3stage.append(border);
-       };
-       const button=hot(...p,"Jawapan "+String.fromCharCode(65+i),select);
-       button.style.zIndex="12";
-       button.style.touchAction="manipulation";
-       button.style.pointerEvents="auto";
-       button.style.webkitTapHighlightColor="transparent";
-       button.addEventListener("pointerup",e=>{if(e.pointerType==="touch"){e.preventDefault();select()}});
+     const cards=[[9,52,36,87],[37,52,64,87],[64,52,92,87]];
+     const choose=i=>{
+       chosen=i;
+       v3stage.querySelectorAll(".answer-selection").forEach(el=>el.remove());
+       const c=cards[i],frame=document.createElement("div");
+       frame.className="answer-selection";
+       frame.style.cssText="position:absolute;pointer-events:none;z-index:20;left:"+c[0]+"%;top:"+c[1]+"%;width:"+(c[2]-c[0])+"%;height:"+(c[3]-c[1])+"%;border:4px solid #28db6b;border-radius:16px;background:#31df6f22";
+       v3stage.append(frame);
+     };
+     const capture=e=>{
+       const rect=v3stage.getBoundingClientRect();
+       const x=(e.clientX-rect.left)/rect.width*100,y=(e.clientY-rect.top)/rect.height*100;
+       const i=cards.findIndex(c=>x>=c[0]&&x<=c[2]&&y>=c[1]&&y<=c[3]);
+       if(i<0)return;
+       e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();choose(i);
+     };
+     v3stage.addEventListener("pointerdown",capture,true);
+     cards.forEach((c,i)=>{
+       const button=hot(c[0],c[1],c[2]-c[0],c[3]-c[1],"Jawapan "+String.fromCharCode(65+i),()=>choose(i));
+       button.style.zIndex="14";
      });
    }else{
      const wrap=floating(16,42,68,32,"","order-words");
