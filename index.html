@@ -154,11 +154,31 @@ function v3render(){
        button.style.zIndex="14";
      });
    }else{
-     const wrap=floating(16,42,68,32,"","order-words");
-     const result=document.createElement("div");result.textContent="Ayat disusun: ";wrap.append(result);
-     q.sort.map((w,i)=>({w,i})).sort((a,b)=>((a.i*7+3)%13)-((b.i*7+3)%13)).forEach(({w})=>{
-       const b=document.createElement("button");b.textContent=w;b.onclick=()=>{sortList.push(w);b.disabled=true;result.textContent="Ayat disusun: "+sortList.join(" ")};wrap.append(b);
+     // Word choices and seven blank slots belong to the illustrated background.
+     // Never draw a second panel over the artwork.
+     const words=["Siti","menggunakan","masa","lapangnya","untuk","membaca","buku."];
+     const wordZones=[[23,67,13,9],[38,67,17,9],[57,67,13,9],[72,67,17,9],[32,76,14,9],[48,76,14,9],[64,76,14,9]];
+     const blanks=[ [23,55,9,8],[33,55,9,8],[43,55,9,8],[53,55,9,8],[63,55,9,8],[73,55,9,8],[83,55,9,8] ];
+     const paint=()=>{
+       v3stage.querySelectorAll(".placed-word,.used-word").forEach(el=>el.remove());
+       sortList.forEach((word,i)=>{
+         const p=blanks[i];if(!p)return;
+         const label=document.createElement("span");label.className="placed-word";label.textContent=word.replace(/\\.$/,"");
+         label.style.cssText="position:absolute;z-index:15;pointer-events:none;left:"+p[0]+"%;top:"+p[1]+"%;width:"+p[2]+"%;height:"+p[3]+"%;display:flex;align-items:center;justify-content:center;text-align:center;font:bold clamp(9px,1.3vw,17px) Arial;color:#183c7c;overflow:hidden";
+         v3stage.append(label);
+         const wi=words.indexOf(word);const zone=wordZones[wi];
+         if(zone){const marker=document.createElement("div");marker.className="used-word";marker.style.cssText="position:absolute;z-index:14;pointer-events:none;left:"+zone[0]+"%;top:"+zone[1]+"%;width:"+zone[2]+"%;height:"+zone[3]+"%;border:3px solid #35db73;border-radius:12px;background:#2bdc6833";v3stage.append(marker)}
+       });
+     };
+     wordZones.forEach((p,i)=>{const button=hot(...p,"Perkataan "+words[i],()=>{if(sortList.includes(words[i]))return;sortList.push(words[i]);paint()});button.style.zIndex="13"});
+     hot(17,87,20,12,"Padam",()=>{sortList.pop();paint()});
+     hot(40,87,24,12,"Semak jawapan",()=>{
+       const normalize=t=>t.join(" ").replace(/[.]/g,"").trim().toLowerCase();
+       if(sortList.length!==words.length)return alert("Lengkapkan tujuh perkataan dahulu.");
+       if(normalize(sortList)!==normalize(q.sort))return alert("Susunan belum tepat. Cuba lagi.");
+       entry().quiz[mi][qi]=true;save();alert("Tahniah! Susunan ayat betul. Tekan Selesai Misi.");
      });
+     hot(67,87,27,12,"Selesai misi",()=>{if(!entry().quiz[mi][qi])return alert("Tekan Semak Jawapan terlebih dahulu.");finishMission()});
    }
    let checked=false;
    const check=()=>{
@@ -167,11 +187,11 @@ function v3render(){
      if(!valid)return alert("Jawapan belum tepat. Cuba lagi.");
      checked=true;entry().quiz[mi][qi]=true;save();alert("Syabas! Jawapan betul. Tekan Seterusnya.");
    };
-   hot(16,87,31,12,"Semak jawapan",check);
+   if(!q.sort){hot(16,87,31,12,"Semak jawapan",check);
    hot(49,87,31,12,"Seterusnya",()=>{
      if(!checked&&!entry().quiz[mi][qi])return alert("Sila semak jawapan yang betul dahulu.");
      if(qi===0)openScreen("quiz",mi,0,1);else finishMission();
-   });
+   });}
  }else if(screen==="win"){
    hot(29.5,73.8,41.8,12.2,"Kembali ke Peta",()=>openScreen("map"));
    hot(36.5,85.5,33.5,9.6,"Misi Seterusnya",()=>{if(mi<2)openScreen("intro",mi+1,0,0);else openScreen("finish")});
