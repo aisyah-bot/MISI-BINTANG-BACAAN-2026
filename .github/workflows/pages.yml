@@ -21,6 +21,15 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Pages
         uses: actions/configure-pages@v5
+      - name: Generate Malay proverb narration MP3
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq espeak ffmpeg
+          mkdir -p audio
+          espeak -v ms -s 120 -p 50 -w /tmp/m1.wav "Masa itu emas"
+          espeak -v ms -s 120 -p 50 -w /tmp/m2.wav "Berganding bahu"
+          espeak -v ms -s 115 -p 50 -w /tmp/m3.wav "Tak lapuk dek hujan, tak lekang dek panas"
+          for n in 1 2 3; do ffmpeg -loglevel error -y -i "/tmp/m$n.wav" -codec:a libmp3lame -qscale:a 4 "audio/m$n-peribahasa.mp3"; done
       - name: Upload site
         uses: actions/upload-pages-artifact@v3
         with:
