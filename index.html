@@ -210,7 +210,7 @@ function v3render(){
    hot(20,86,27,11,"Kembali ke Peta",()=>openScreen("map"));
    hot(51,86,27,11,"Utama",()=>openScreen("home"));
    hot(18,73,65,12,"Misi seterusnya dibuka",()=>{if(mi<2)openScreen("intro",mi+1,0,0);else openScreen("finish")});
-   const cover=document.createElement("div");cover.style.cssText="position:absolute;left:24%;top:61%;width:52%;height:11%;background:linear-gradient(90deg,#f6db96,#fff1c7 15%,#fff4d3 85%,#e9bf71);border-radius:12px;z-index:3;pointer-events:none;display:flex;align-items:center;justify-content:center;font:bold clamp(19px,3.3vw,46px) Arial;color:#16478e;text-align:center";cover.textContent="Tahniah!";v3stage.append(cover);
+
  }else if(screen==="finish"){
    if(!name)return openScreen("home");
    const e=entry();floating(31,58,39,16,"<b>"+e.finished.filter(Boolean).length+"/3 misi selesai</b><br>"+e.stars.reduce((a,b)=>a+b,0)+" daripada 9 bintang");
