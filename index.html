@@ -32,7 +32,8 @@ let students=safeParse(localStorage.getItem(key),{}),name=localStorage.getItem(k
 const save=()=>{localStorage.setItem(key,JSON.stringify(students));localStorage.setItem(key+"name",name)};
 const blank=()=>({finished:[false,false,false],reads:[[false,false,false],[false,false,false],[false,false,false]],quiz:[[false,false],[false,false],[false,false]],stars:[0,0,0],marks:{},recordCount:0});
 function entry(){if(!students[name])students[name]=blank();return students[name]}
-function openScreen(s,m=mi,r=ri,q=qi){if(recorder&&recorder.state==="recording")recorder.stop();stopAudio();screen=s;mi=m;ri=r;qi=q;chosen=-1;sortList=[];render()}
+const sceneHistory=[];function goBack(){if(sceneHistory.length){const prev=sceneHistory.pop();openScreen(prev.s,prev.m,prev.r,prev.q,true)}else openScreen("home",0,0,0,true)}
+function openScreen(s,m=mi,r=ri,q=qi,back=false){if(!back&&screen!==s)sceneHistory.push({s:screen,m:mi,r:ri,q:qi});if(recorder&&recorder.state==="recording")recorder.stop();stopAudio();screen=s;mi=m;ri=r;qi=q;chosen=-1;sortList=[];render()}
 function bgIndex(){if(screen==="home")return 0;if(screen==="how")return 1;if(screen==="map")return 2;if(screen==="teacher")return 26;if(screen==="finish")return 24;if(screen==="certificate")return 25;if(screen==="intro")return screens.intro[mi];if(screen==="read")return screens.read[mi][ri];if(screen==="quiz")return screens.quiz[mi][qi];if(screen==="win")return screens.win[mi];return 0}
 function stopAudio(){if(audio){audio.pause();audio=null}if("speechSynthesis" in window)speechSynthesis.cancel()}
 function setBg(i){const scene=$("scene");const img=new Image();img.onload=()=>{if(bgIndex()===i)scene.style.backgroundImage='url("'+assets[i]+'")'};img.onerror=()=>{if(bgIndex()===i)scene.style.backgroundImage='url("'+fallback[i>=17?"3":i>=10?"2":i>=3?"1":"0"]+'")'};img.src=assets[i]}
@@ -78,7 +79,7 @@ function toggleHomeSound(){
   audio.play().catch(()=>alert("Audio tidak dapat dimainkan. Sila semak tetapan bunyi Safari."));
  }
 }
-const HOTSPOT_DEBUG=new URLSearchParams(location.search).has("hotspots");
+const BACK_LABELS=["Kembali","Kembali ke peta"];const HOTSPOT_DEBUG=new URLSearchParams(location.search).has("hotspots");
 
 /* V3 interactive graphic scenes: graphic is primary UI, invisible hotspots execute actions */
 const v3stage=$("stage");
@@ -104,12 +105,12 @@ function v3render(){
    hot(30,73,42,13,"Mula Pengembaraan",begin);hot(20,87,20,12,"Cara Bermain",()=>openScreen("how"));hot(41,87,20,12,"Pencapaian",()=>{const v=$("v3name").value.trim();if(v){name=v;entry();save();openScreen("finish")}else alert("Masukkan nama dahulu.")});hot(62,87,20,12,"Ruang Guru",()=>$("teacherShortcut").click());
    hot(1.5,1.8,7,12,"Bunyi halaman utama",toggleHomeSound);
    $("v3name").onkeydown=e=>{if(e.key==="Enter")begin()};
- }else if(screen==="how"){hot(2,2,8,12,"Kembali",()=>openScreen("home"));hot(37,79,25,13,"Kembali ke peta",()=>name?openScreen("map"):openScreen("home"));bar([["Utama",()=>openScreen("home")],["Peta",()=>name?openScreen("map"):openScreen("home")]]);
+ }else if(screen==="how"){hot(75,84,19,13,"Kembali",goBack);hot(33,82,37,15,"Mula Pengembaraan",()=>name?openScreen("map"):openScreen("home"));
  }else if(screen==="map"){
     for(let i=0;i<3;i++){const allowed=i===0||entry().finished[i-1];hot(25+i*23.5,49,22,39,"Misi "+(i+1),()=>allowed?openScreen("intro",i):alert("Selesaikan misi "+i+" terlebih dahulu."),!allowed)}
     hot(1.8,2.5,7,12,"Utama",()=>openScreen("home"));
  }else if(screen==="intro"){
-   hot(31,75,40,12,"Mula aktiviti bacaan",()=>openScreen("read",mi,0));hot(35,88,14,10,"Utama",()=>openScreen("home"));hot(52,88,14,10,"Peta",()=>openScreen("map"));
+   hot(31,75,40,12,"Mula aktiviti bacaan",()=>openScreen("read",mi,0));
  }else if(screen==="read"){
    const updateMsg=t=>notice(t);
    const sample=()=>{playSample();updateMsg("Audio contoh dimainkan. Sila dengar dengan teliti.")};
@@ -121,7 +122,7 @@ function v3render(){
    hot(59,75,17,10,"Semak bacaan",()=>{let e=entry();if(!recordings[mi+"-"+ri]&&!e.reads[mi][ri])return alert("Sila rakam bacaan dahulu.");e.reads[mi][ri]=true;save();updateMsg("Bacaan telah ditandakan. Guru menilai sebutan dan intonasi.")});
    hot(37,86,30,12,"Seterusnya",()=>{if(!entry().reads[mi][ri])return alert("Rakam dan semak bacaan terlebih dahulu.");if(ri<2)openScreen("read",mi,ri+1);else openScreen("quiz",mi,0,0)});
    if(entry().reads[mi][ri])updateMsg("Bacaan ini telah diselesaikan.");
-   bar([["Peta",()=>openScreen("map")]]);
+   
  }else if(screen==="quiz"){
    const q=missions[mi].questions[qi];
    const wrap=floating(31,38,64,51,"","quizOverlay");
@@ -133,10 +134,10 @@ function v3render(){
    const check=()=>{let correct=q.sort?sortList.join(" ")===q.sort.join(" "):chosen===q.right;if((q.sort&&!sortList.length)||(!q.sort&&chosen<0))return alert("Sila pilih jawapan.");if(!correct)return alert("Belum tepat. Cuba lagi.");entry().quiz[mi][qi]=true;save();alert("Tahniah! Jawapan betul.");if(qi===0)openScreen("quiz",mi,0,1);else finishMission()};
    hot(32,84,31,15,"Semak jawapan",check);
    hot(65,84,31,15,qi?"Selesai misi":"Seterusnya",check);
-   bar([["Semula",()=>openScreen("quiz",mi,0,qi)]]);
+   
  }else if(screen==="win"){
    hot(32,84,34,12,"Kembali ke peta",()=>openScreen("map"));
-   bar([["Peta",()=>openScreen("map")],["Utama",()=>openScreen("home")]]);
+   
  }else if(screen==="finish"){
    if(!name)return openScreen("home");
    const e=entry();floating(31,58,39,16,"<b>"+e.finished.filter(Boolean).length+"/3 misi selesai</b><br>"+e.stars.reduce((a,b)=>a+b,0)+" daripada 9 bintang");
@@ -146,7 +147,7 @@ function v3render(){
    const e=entry();if(!e.finished.every(Boolean))return openScreen("map");
    floating(31,35,37,9,"Penerima: "+name);
    hot(36,89,32,10,"Cetak sijil",()=>window.print());
-   bar([["Utama",()=>openScreen("home")]]);
+   
  }else if(screen==="teacher"){
    const d=floating(19,20,73,70,'<b>Penilaian bacaan guru</b><br><label>Murid <select id="vstu"></select></label><br><label>Misi <select id="vm"><option value="0">1</option><option value="1">2</option><option value="2">3</option></select></label> <label>Bacaan <select id="vr"><option value="0">Peribahasa</option><option value="1">Ayat 1</option><option value="2">Ayat 2</option></select></label><br><label>Sebutan /10 <input type="number" id="vs" min="0" max="10" value="0"></label> <label>Kelancaran /5 <input type="number" id="vl" min="0" max="5" value="0"></label> <label>Intonasi /5 <input type="number" id="vi" min="0" max="5" value="0"></label><div><button id="vplay">Dengar rakaman</button><button id="vsave">Simpan</button><button id="vcsv">Eksport CSV</button></div><div id="vmsg"></div>',"teacherOverlay");
    Object.keys(students).forEach(n=>{let o=document.createElement("option");o.textContent=n;o.value=n;$("vstu").append(o)});if(students[name])$("vstu").value=name;
