@@ -136,13 +136,13 @@ function v3render(){
    hot(65,84,31,15,qi?"Selesai misi":"Seterusnya",check);
    
  }else if(screen==="win"){
-   hot(32,84,34,12,"Kembali ke peta",()=>openScreen("map"));
+   hot(32,84,34,12,"Kembali",goBack);
    
  }else if(screen==="finish"){
    if(!name)return openScreen("home");
    const e=entry();floating(31,58,39,16,"<b>"+e.finished.filter(Boolean).length+"/3 misi selesai</b><br>"+e.stars.reduce((a,b)=>a+b,0)+" daripada 9 bintang");
    hot(18,82,30,16,"Lihat sijil",()=>e.finished.every(Boolean)?openScreen("certificate"):alert("Lengkapkan semua misi."));
-   hot(51,82,30,16,"Kembali ke peta",()=>openScreen("map"));
+   hot(51,82,30,16,"Kembali",goBack);
  }else if(screen==="certificate"){
    const e=entry();if(!e.finished.every(Boolean))return openScreen("map");
    floating(31,35,37,9,"Penerima: "+name);
@@ -155,7 +155,7 @@ function v3render(){
    ["vstu","vm","vr"].forEach(k=>$(k).onchange=refresh);refresh();
    $("vplay").onclick=()=>{if($("vstu").value!==name)return alert("Rakaman hanya tersedia untuk murid aktif dalam sesi ini.");const blob=recordings[$("vm").value+"-"+$("vr").value];if(!blob)return alert("Rakaman tidak tersedia dalam sesi ini.");stopAudio();audio=new Audio(URL.createObjectURL(blob));audio.play()};
    $("vsave").onclick=()=>{const e=students[$("vstu").value];if(!e)return;const v=["vs","vl","vi"].map(k=>Number($(k).value));if(v.some((x,i)=>!Number.isFinite(x)||x<0||x>[10,5,5][i]))return alert("Markah di luar julat.");e.marks[$("vm").value+"-"+$("vr").value]=v;save();$("vmsg").textContent="Disimpan: "+v.reduce((a,b)=>a+b,0)+"/20"};
-   $("vcsv").onclick=exportCsv;bar([["Utama",()=>openScreen("home")]]);
+   $("vcsv").onclick=exportCsv;
  }
 }
 function reportStatus(message){const el=$("rstatus");if(el)el.textContent=message;else if(typeof notice==="function"&&screen==="read")notice(message)}
