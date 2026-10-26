@@ -97,6 +97,7 @@ function bar(items){const d=document.createElement("div");d.className="btnbar";i
 function notice(s){let n=v3stage.querySelector(".fnotice");if(!n){n=document.createElement("div");n.className="fnotice";v3stage.append(n)}n.textContent=s}
 function checkProceed(){const e=entry();return e.reads[mi][ri]}
 function v3render(){
+ if(v3stage._quizCapture){v3stage.removeEventListener("pointerdown",v3stage._quizCapture,true);v3stage._quizCapture=null;}
  const ix=bgIndex();sceneGraphic(ix);
  if(screen==="home"){
    const field=document.createElement("input");field.id="v3name";field.className="sceneName";field.setAttribute("aria-label","Nama murid");field.placeholder="Nama murid";field.maxLength=60;v3stage.append(field);
@@ -147,7 +148,7 @@ function v3render(){
        if(i<0)return;
        e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();choose(i);
      };
-     v3stage.addEventListener("pointerdown",capture,true);
+     v3stage._quizCapture=capture;v3stage.addEventListener("pointerdown",capture,true);
      cards.forEach((c,i)=>{
        const button=hot(c[0],c[1],c[2]-c[0],c[3]-c[1],"Jawapan "+String.fromCharCode(65+i),()=>choose(i));
        button.style.zIndex="14";
