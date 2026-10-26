@@ -21,6 +21,14 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Pages
         uses: actions/configure-pages@v5
+      - name: Install supplied game graphics
+        run: |
+          test -f GRAFIK-PERMAINAN-TERKINI.zip
+          unzip -oq GRAFIK-PERMAINAN-TERKINI.zip 'assets/*' -d .
+          test -s assets/03-map-v2.png
+          test -s assets/10-win1-v2.png
+          test -s assets/17-win2-v2.png
+          echo "All 3 updated game graphics are ready."
       - name: Generate Malay proverb narration MP3
         run: |
           sudo apt-get update -qq
