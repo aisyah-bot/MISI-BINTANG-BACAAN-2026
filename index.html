@@ -158,13 +158,13 @@ function v3render(){
      // Never draw a second panel over the artwork.
      const words=["Siti","menggunakan","masa","lapangnya","untuk","membaca","buku."];
      const wordZones=[[23,67,13,9],[38,67,17,9],[57,67,13,9],[72,67,17,9],[32,76,14,9],[48,76,14,9],[64,76,14,9]];
-     const blanks=[ [23,55,9,8],[33,55,9,8],[43,55,9,8],[53,55,9,8],[63,55,9,8],[73,55,9,8],[83,55,9,8] ];
+     const blanks=[[23,54.7,9.4,8],[33.1,54.7,9.4,8],[43.2,54.7,9.4,8],[53.3,54.7,9.4,8],[63.4,54.7,9.4,8],[73.5,54.7,9.4,8],[83.6,54.7,9.4,8]];
      const paint=()=>{
        v3stage.querySelectorAll(".placed-word,.used-word").forEach(el=>el.remove());
        sortList.forEach((word,i)=>{
          const p=blanks[i];if(!p)return;
          const label=document.createElement("span");label.className="placed-word";label.textContent=word.replace(/\.$/,"");
-         label.style.cssText="position:absolute;z-index:15;pointer-events:none;left:"+p[0]+"%;top:"+p[1]+"%;width:"+p[2]+"%;height:"+p[3]+"%;display:flex;align-items:center;justify-content:center;text-align:center;font:bold clamp(9px,1.3vw,17px) Arial;color:#183c7c;overflow:hidden";
+         label.style.cssText="position:absolute;z-index:15;pointer-events:none;left:"+p[0]+"%;top:"+p[1]+"%;width:"+p[2]+"%;height:"+p[3]+"%;display:flex;align-items:center;justify-content:center;text-align:center;font:bold "+(word.length>9?"clamp(6px,0.84vw,12px)":"clamp(8px,1.08vw,15px)")+" Arial;color:#183c7c;overflow:hidden;white-space:nowrap;text-overflow:clip;padding:0 2px;box-sizing:border-box";
          v3stage.append(label);
          const wi=words.indexOf(word);const zone=wordZones[wi];
          if(zone){const marker=document.createElement("div");marker.className="used-word";marker.style.cssText="position:absolute;z-index:14;pointer-events:none;left:"+zone[0]+"%;top:"+zone[1]+"%;width:"+zone[2]+"%;height:"+zone[3]+"%;border:3px solid #35db73;border-radius:12px;background:#2bdc6833";v3stage.append(marker)}
